@@ -35,10 +35,9 @@
       <v-tree v-if="rootDirectory" :item="rootDirectory">
         <template v-slot:default="{item}">
           <label v-if="item.value.type === 'directory'">
-            <input v-if="item.value.type === 'directory'" type="checkbox"
-                    :value="item.isOpen"
-                    @input="item.children ? null : expandDirectoryEntries(item);
-                            item.isOpen = $event.target.checked;" />
+            <input type="checkbox" :checked="item.isOpen"
+                   @input="item.children ? null : expandDirectoryEntries(item);
+                           item.isOpen = $event.target.checked;" />
               {{ item.value.name }}
           </label>
           <button v-else-if="item.value.type === 'file'" type="button"
