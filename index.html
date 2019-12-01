@@ -27,6 +27,11 @@
       <button type="button" @click="selectRootDirectory">
         Select directory
       </button>
+      <button type="button" v-if="rootDirectory"
+              @click="expandDirectoryEntries(rootDirectory);
+                      rootDirectory.isOpen = true;">
+        Refresh
+      </button>
       <v-tree v-if="rootDirectory" :item="rootDirectory">
         <template v-slot:default="{item}">
           <label v-if="item.value.type === 'directory'">
