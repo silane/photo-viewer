@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="index.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="index.js"></script>
+  <title>Photo Viewer</title>
+</head>
+<body>
+  <div id="app" class="page">
+    <script type="text/x-template" id="tree-template">
+      <div>
+        <slot name="default" :item="item">aa</slot>
+        <ul v-if="item.children" v-show="item.isOpen">
+          <li v-for="(child, idx) in item.children" :key="idx">
+            <v-tree :item="child">
+              <template v-slot:default="{item}">
+                <slot name="default" :item="item"></slot>
+              </template>
+            </v-tree>
+          </li>
+        </ul>
+      </div>
+    </script>
+    <section class="page-directorytree">
+      <button type="button" @click="selectRootDirectory">
+        Select directory
+      </button>
+      <v-tree v-if="rootDirectory" :item="rootDirectory">
+        <template v-slot:default="{item}">
+          <label v-if="item.value.type === 'directory'">
+            <input v-if="item.value.type === 'directory'" type="checkbox"
+                    :value="item.isOpen"
+                    @input="item.children ? null : expandDirectoryEntries(item);
+                            item.isOpen = $event.target.checked;" />
+              {{ item.value.name }}
+          </label>
+          <button v-else-if="item.value.type === 'file'" type="button"
+                  @click="viewingFile = item">
+            {{ item.value.name }}
+          </button>
+          <template v-else>
+            {{ item.value.name }}
+          </template>
+        </template>
+      </v-tree>      
+    </section>
+    <section class="page-viewer">
+      <img v-if="viewingFileURL" :src="viewingFileURL" class="page-viewerimg"
+           @dblclick="requestFullscreen($event.target)" :style="{
+             transform: `scale(${viewerZoom})`, transformOrigin: '0 0',
+           }" />
+    </section>
+  </div>
+</body>
+</html>
