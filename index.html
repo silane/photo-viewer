@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="index.css">
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-  <script src="index.js"></script>
+  <script type="module" src="index.js"></script>
   <title>Photo Viewer</title>
 </head>
 <body>
@@ -41,7 +41,7 @@
               {{ item.value.name }}
           </label>
           <button v-else-if="item.value.type === 'file'" type="button"
-                  @click="viewingFile = item">
+                  @click="viewFile(item)">
             {{ item.value.name }}
           </button>
           <template v-else>

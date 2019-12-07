@@ -1,3 +1,6 @@
+import { walktree } from './treewalker.js';
+
+
 function divmod(a, b) {
   const q = Math.floor(a / b);
   return [q, a - b * q];
@@ -21,6 +24,7 @@ window.addEventListener('DOMContentLoaded', e => {
       viewingFile: null,
       viewingFileURL: null,
       viewerZoomSource: 0,
+      viewingDirectory: null,
     }; },
     created() {
       document.addEventListener('keydown', e => this.keyDownEventHandler(e));
@@ -42,7 +46,7 @@ window.addEventListener('DOMContentLoaded', e => {
       },
     },
     methods: {
-      keyDownEventHandler(e) {
+      async keyDownEventHandler(e) {
         if(!this.viewingFile) return;
         if(!this.viewingFile.value.parent) return;
         const viewingDirectory = this.viewingFile.value.parent;
@@ -50,28 +54,10 @@ window.addEventListener('DOMContentLoaded', e => {
         let processed = true;
         switch(e.key) {
           case 'ArrowLeft':
-            for(let idx = viewingIdx - 1;; --idx) {
-              idx = divmod(idx, viewingDirectory.children.length)[1];
-              if(idx === viewingIdx)
-                break;
-              const item = viewingDirectory.children[idx];
-              if(item.value.type !== 'file')
-                continue;
-              this.viewingFile = item;
-              break;
-            }
+            this.viewingFile = await this.nextFile(-1);
             break;
           case 'ArrowRight':
-            for(let idx = viewingIdx + 1;; ++idx) {
-              idx = divmod(idx, viewingDirectory.children.length)[1];
-              if(idx === viewingIdx)
-                break;
-              const item = viewingDirectory.children[idx];
-              if(item.value.type !== 'file')
-                continue;
-              this.viewingFile = item;
-              break;
-            }
+            this.viewingFile = await this.nextFile(1);
             break;
           case 'ArrowUp':
             this.viewerZoomSource += 1;
@@ -123,8 +109,41 @@ window.addEventListener('DOMContentLoaded', e => {
         directory.children = [...children.filter(x => x.value.type === 'directory'),
                               ...children.filter(x => x.value.type !== 'directory')];
       },
-      async viewImageFile(file) {
+      async nextFile(delta) {
+        let viewingFileTreeEntry = null;
+        const createTreewalkerTree = (entry, parent) => {
+          const ret = {
+            parent,
+            value: {
+              entry,
+            },
+          };
+          if(entry.value.type === 'file') {
+            ret.children = false;
+          } else if(entry.value.type === 'directory') {
+            if(entry.children)
+              ret.children = entry.children.map(x => createTreewalkerTree(x, ret));
+            else
+              ret.children = true;
+            ret.expandChildren = async () => {
+              if(!entry.children)
+                await this.expandDirectoryEntries(entry);
+              ret.children = entry.children.map(x => createTreewalkerTree(x, ret));
+            };
+          }
+
+          if(entry === this.viewingFile)
+            viewingFileTreeEntry = ret;
+
+          return ret;
+        }
+        
+        const tree = createTreewalkerTree(this.viewingDirectory, null);
+        return (await walktree(viewingFileTreeEntry, delta)).value.entry;
+      },
+      viewFile(file) {
         this.viewingFile = file;        
+        this.viewingDirectory = file.value.parent;
       },
       requestFullscreen(element) {
         element.requestFullscreen();
