@@ -1,9 +1,4 @@
 # photo-viewer
-Web photo viewer using Native File System API
+Browser photo viewer using File System Access API
 
-## How to run
-You need a browser supporting Native File System API.
-At the moment, chrome is the only one.
-
-1. Open `chrome://flags/#native-file-system-api` and enable the feature.
-1. Open `index.html` with chrome.
+You need a browser supporting [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API).

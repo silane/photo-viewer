@@ -73,8 +73,7 @@ window.addEventListener('DOMContentLoaded', e => {
         }
       },
       async selectRootDirectory() {
-        const opts = {type: 'openDirectory'};
-        const handle = await window.chooseFileSystemEntries(opts);
+        const handle = await window.showDirectoryPicker();
         const rootEntry = {
           value: {
             handle,
@@ -93,8 +92,8 @@ window.addEventListener('DOMContentLoaded', e => {
         if(directory.value.type !== 'directory')
           return;
         const children = [];
-        for await (const entry of directory.value.handle.getEntries()) {
-          const type = entry.isFile ? 'file' : 'directory';
+        for await (const entry of directory.value.handle.values()) {
+          const type = entry.kind;
           children.push({
             value: {
               handle: entry,
